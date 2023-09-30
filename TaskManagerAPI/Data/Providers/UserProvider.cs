@@ -1,5 +1,6 @@
 ﻿using System.Data.SqlClient;
 using Dapper;
+using Microsoft.Data.Sqlite;
 using TaskManagerAPI.Models;
 
 namespace TaskManagerAPI.Data.Providers;
@@ -23,7 +24,7 @@ public class UserProvider:IUserProvider
     {
         string sql = "SELECT UserID, Username, Email, Password FROM Users WHERE Username=@Username";
         
-        using var connection = new SqlConnection(_connectionString);
+        using var connection = new SqliteConnection(_connectionString);
         var user = connection.Query<User>(sql, new {Username = username}); 
         return user;
     }
@@ -32,7 +33,7 @@ public class UserProvider:IUserProvider
     {
         string sql = "Insert into Users (Username, Email, Password) values(@Username, @Email, @Password)";
 
-        using var connection = new SqlConnection(_connectionString);
+        using var connection = new SqliteConnection(_connectionString);
         var result = connection.Execute(sql, new {Username = user.Username, Email=user.Email, Password=user.Password});
     }
 
@@ -40,7 +41,7 @@ public class UserProvider:IUserProvider
     {
         string sql = "SELECT UserID FROM Users WHERE Username=@Username";
 
-        using var connection = new SqlConnection(_connectionString);
+        using var connection = new SqliteConnection(_connectionString);
         int id = connection.Query<int>(sql, new { Username = username }).FirstOrDefault();
 
         return id > 0;

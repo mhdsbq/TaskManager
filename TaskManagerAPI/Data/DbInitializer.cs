@@ -1,4 +1,4 @@
-﻿using System.Data.SqlClient;
+﻿using Microsoft.Data.Sqlite;
 using System.Security;
 using Dapper;
 
@@ -12,21 +12,18 @@ public interface IDbInitializer
 public class DbInitializer : IDbInitializer
 {
     private const string CreateTableFilePath = "Data/Database/Tables";
-    private const string CreateDbFilePath = "Data/Database/TaskManagerDB.sql";
-    private const string ExistingTaskManagerDBFilePath = "Data/Database/ExistingTaskManagerDB.sql";
+    private const string DbFilePath = "Data/Database/TaskManager.db";
     private const string SqlExtension = ".sql";
-    private readonly SqlConnection _connection;
+    private readonly SqliteConnection _connection;
 
-    public DbInitializer(IConfiguration configuration)
+    public DbInitializer(string connectionString)
     {
-        if (configuration == null)
+        if (connectionString == null)
         {
-            throw new ArgumentNullException(nameof(configuration));
+            throw new ArgumentNullException(nameof(connectionString));
         }
 
-        var connectionString = configuration["ConnectionStrings:AdminConnection"];
-        _connection = new SqlConnection(connectionString);
-        // TODO: ADD validation for connection
+        _connection = new SqliteConnection(connectionString);
     }
 
     /// <summary>
@@ -34,24 +31,15 @@ public class DbInitializer : IDbInitializer
     /// </summary>
     public void InitializeDb()
     {
-        // TODO: Add connection validation.
         _connection.Open();
         if (IsTaskManagerDbExisting())
         {
             _connection.Close();
             return;
         }
-        CreateDatabase();
+        // CreateDatabase();
         CreateTables();
         _connection.Close();
-    }
-
-    /// <summary>
-    /// Create TaskManagerDB if it doesn't already exist
-    /// </summary>
-    private void CreateDatabase()
-    {
-        ExecuteSqlFile(CreateDbFilePath);
     }
 
     /// <summary>
@@ -66,7 +54,6 @@ public class DbInitializer : IDbInitializer
             {
                 throw new SecurityException("A non SQL file should not be allowed");
             }
-            UseTaskManagerDb();
             ExecuteSqlFile(file);
         }
     }
@@ -78,22 +65,14 @@ public class DbInitializer : IDbInitializer
     {
         FileInfo file = new FileInfo(filePath);
         string script = file.OpenText().ReadToEnd();
-        using SqlCommand command = new SqlCommand(script, _connection);
-        command.ExecuteNonQuery();
-    }
-
-    private void UseTaskManagerDb()
-    {
-        using SqlCommand command = new SqlCommand("USE TaskManagerDB", _connection);
+        using SqliteCommand command = new SqliteCommand(script, _connection);
         command.ExecuteNonQuery();
     }
 
     private bool IsTaskManagerDbExisting()
     {
-        FileInfo file = new FileInfo(ExistingTaskManagerDBFilePath);
-        string script = file.OpenText().ReadToEnd();
-        int taskManagerDbAlreadyExist =  _connection.Query<int>(script).FirstOrDefault();
-
-        return taskManagerDbAlreadyExist > 0;
+        string sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='Users'";
+        var existingTableName = _connection.Query<string>(sql).FirstOrDefault();
+        return !string.IsNullOrEmpty(existingTableName);
     }
 }
