@@ -7,9 +7,10 @@ namespace TaskManagerAPI.Data.Providers;
 
 public interface IUserProvider
 {
-    public IEnumerable<User> GetUserWithUsername(string username);
+    public IEnumerable<User> GetUserWithUsername(string? username);
     public void CreateUser(User user);
     public bool IsExistingUser(string username);
+    public int GetUserIdWithUsername(string? username);
 }
 
 public class UserProvider:IUserProvider
@@ -20,7 +21,7 @@ public class UserProvider:IUserProvider
         _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
     }
 
-    public IEnumerable<User> GetUserWithUsername(string username)
+    public IEnumerable<User> GetUserWithUsername(string? username)
     {
         string sql = "SELECT UserID, Username, Email, Password FROM Users WHERE Username=@Username";
         
@@ -45,5 +46,17 @@ public class UserProvider:IUserProvider
         int id = connection.Query<int>(sql, new { Username = username }).FirstOrDefault();
 
         return id > 0;
+    }
+
+    public int GetUserIdWithUsername(string? username)
+    {
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            throw new ArgumentNullException(nameof(username));
+        }
+
+        string sql = "SELECT UserID FROM Users WHERE Username=@Username";
+        using var connection = new SqliteConnection(_connectionString);
+        return connection.Query<int>(sql, new { Username = username }).FirstOrDefault();
     }
 }

@@ -24,6 +24,7 @@ public class DbInitializer : IDbInitializer
         }
 
         _connection = new SqliteConnection(connectionString);
+        InitializeDb();
     }
 
     /// <summary>

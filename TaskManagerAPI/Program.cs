@@ -27,10 +27,12 @@ builder.Services.AddSingleton<IDbInitializer, DbInitializer>();
 
 // DI for providers
 builder.Services.AddScoped<IUserProvider, UserProvider>();
+builder.Services.AddScoped<ITaskProvider, TaskProvider>();
 
 // DI for services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthHelperService, AuthHelperService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -97,6 +99,10 @@ app.UseExceptionHandler(c => c.Run(async context =>
         case ValidationException:
         case SecurityException:
             statusCode = StatusCodes.Status400BadRequest;
+            break;
+        case UnauthorizedAccessException:
+            statusCode = StatusCodes.Status401Unauthorized;
+            message = "Unauthorized operation.";
             break;
         default:
             message = "Internal server error.";

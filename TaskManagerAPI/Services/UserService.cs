@@ -7,7 +7,8 @@ namespace TaskManagerAPI.Services;
 
 public interface IUserService
 {
-    public string GetUsername();
+    public int GetAuthorizedUserId();
+    public string? GetAuthorizedUsername();
     public User GetAuthenticatedUser();
     public User? GetUserWithUsernameAndPassword(User user);
     public User CreateUser(User user);
@@ -29,7 +30,12 @@ public class UserService : IUserService
     }
 
 
-    public string GetUsername()
+    public int GetAuthorizedUserId()
+    {
+        return _userProvider.GetUserIdWithUsername(GetAuthorizedUsername());
+    }
+
+    public string? GetAuthorizedUsername()
     {
         var username = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (username == null)
@@ -42,7 +48,7 @@ public class UserService : IUserService
 
     public User GetAuthenticatedUser()
     {
-        var user = _userProvider.GetUserWithUsername(GetUsername()).FirstOrDefault();
+        var user = _userProvider.GetUserWithUsername(GetAuthorizedUsername()).FirstOrDefault();
         if (user == null)
         {
             throw new SecurityException("Authorization Error.");
