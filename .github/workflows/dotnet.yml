@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-
+    name: BuildCheck
     runs-on: ubuntu-latest
 
     steps:
