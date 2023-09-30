@@ -1,37 +1,37 @@
 ﻿-- Users Table
 CREATE TABLE Users (
-                       UserId INT PRIMARY KEY IDENTITY(1,1),
-                       Username NVARCHAR(255) NOT NULL,
-                       Email NVARCHAR(255) NOT NULL,
-                       Password NVARCHAR(255) NOT NULL
+                       UserId INTEGER PRIMARY KEY AUTOINCREMENT,
+                       Username TEXT NOT NULL,
+                       Email TEXT NOT NULL,
+                       Password TEXT NOT NULL
 );
 
 -- Tasks Table
 CREATE TABLE Tasks (
-                       TaskId INT PRIMARY KEY IDENTITY(1,1),
-                       UserId INT,
-                       Title NVARCHAR(255) NOT NULL,
-                       Description NVARCHAR(MAX),
-                       Created_at DATETIME2 DEFAULT GETDATE(),
-                       Completed BIT,
+                       TaskId INTEGER PRIMARY KEY AUTOINCREMENT,
+                       UserId INTEGER,
+                       Title TEXT NOT NULL,
+                       Description TEXT,
+                       Created_at DATETIME DEFAULT (datetime('now','localtime')),
+                       Completed INTEGER,
                        FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
 
 -- Subtasks Table
 CREATE TABLE Subtasks (
-                          SubtaskId INT PRIMARY KEY IDENTITY(1,1),
-                          TaskId INT,
-                          Title NVARCHAR(255) NOT NULL,
-                          Completed BIT,
+                          SubtaskId INTEGER PRIMARY KEY AUTOINCREMENT,
+                          TaskId INTEGER,
+                          Title TEXT NOT NULL,
+                          Completed INTEGER,
                           FOREIGN KEY (TaskId) REFERENCES Tasks(TaskId)
 );
 
 -- Sessions Table
 CREATE TABLE Sessions (
-                          Session_id INT PRIMARY KEY IDENTITY(1,1),
-                          TaskId INT,
-                          StartTime DATETIME2,
-                          EndTime DATETIME2,
-                          Duration INT,
+                          SessionId INTEGER PRIMARY KEY AUTOINCREMENT,
+                          TaskId INTEGER,
+                          StartTime DATETIME,
+                          EndTime DATETIME,
+                          Duration INTEGER,
                           FOREIGN KEY (TaskId) REFERENCES Tasks(TaskId)
 );
